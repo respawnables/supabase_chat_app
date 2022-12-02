@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_chat_app/constants.dart';
+import 'package:supabase_chat_app/pages/register_page.dart';
+
+import 'chat_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
