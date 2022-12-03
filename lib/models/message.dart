@@ -17,6 +17,6 @@ class Message {
       : id = map['id'],
         profileId = map['profile_id'],
         content = map['content'],
-        createdAt = map['created_at'],
+        createdAt = DateTime.parse(map['created_at']),
         isMine = myUserId == map['profile_id'];
 }

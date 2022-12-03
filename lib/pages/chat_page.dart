@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_chat_app/constants.dart';
+import 'package:supabase_chat_app/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart';
 
 import '../models/message.dart';
 import '../models/profile.dart';
+import 'register_page.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
 
   static Route<void> route() {
-    return MaterialPageRoute(builder: (context) => const ChatPage());
+    return MaterialPageRoute(
+      builder: (context) => const ChatPage(),
+    );
   }
 
   @override
@@ -46,42 +50,65 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  Future<void> logout() async {
+    try {
+      await supabase.auth.signOut();
+      Navigator.of(context)
+          .pushAndRemoveUntil(RegisterPage.route(), (route) => false);
+    } on AuthException catch (error) {
+      context.showErrorSnackBar(message: error.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat'),
+        actions: [
+          IconButton(
+            onPressed: () => logout(),
+            icon: const Icon(Icons.logout),
+          ),
+        ],
       ),
       body: StreamBuilder<List<Message>>(
         stream: _messagesStream,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final messages = snapshot.data!;
-            return Column(
-              children: [
-                Expanded(
-                  child: messages.isEmpty
-                      ? const Center(
-                          child: Text('Start your conversation now :)'),
-                        )
-                      : ListView.builder(
-                          reverse: true,
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final message = messages[index];
-                            _loadProfileCache(message.profileId);
-                            return _ChatBubble(
-                              message: message,
-                              profile: _profileCache[message.profileId],
-                            );
-                          },
-                        ),
-                ),
-                const _MessageBar(),
-              ],
-            );
+          if (snapshot.connectionState == ConnectionState.active) {
+            if (snapshot.hasData) {
+              final messages = snapshot.data!;
+              return Column(
+                children: [
+                  Expanded(
+                    child: messages.isEmpty
+                        ? const Center(
+                            child: Text('Start your conversation now :)'),
+                          )
+                        : ListView.builder(
+                            reverse: true,
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) {
+                              final message = messages[index];
+                              _loadProfileCache(message.profileId);
+                              return _ChatBubble(
+                                message: message,
+                                profile: _profileCache[message.profileId],
+                              );
+                            },
+                          ),
+                  ),
+                  const _MessageBar(),
+                ],
+              );
+            } else {
+              print(snapshot.error.toString());
+              return preloader;
+            }
           } else {
-            return preloader;
+            return const Center(
+              child: Text('An error occured during fetch messages'),
+            );
           }
         },
       ),
@@ -89,8 +116,11 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
+/// Set of widget that contains TextField and Button to submit message
 class _MessageBar extends StatefulWidget {
-  const _MessageBar({Key? key}) : super(key: key);
+  const _MessageBar({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<_MessageBar> createState() => _MessageBarState();
@@ -105,7 +135,7 @@ class _MessageBarState extends State<_MessageBar> {
       color: Colors.grey[200],
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               Expanded(
@@ -117,6 +147,7 @@ class _MessageBarState extends State<_MessageBar> {
                   decoration: const InputDecoration(
                     hintText: 'Type a message',
                     border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
                     contentPadding: EdgeInsets.all(8),
                   ),
                 ),
@@ -124,7 +155,7 @@ class _MessageBarState extends State<_MessageBar> {
               TextButton(
                 onPressed: () => _submitMessage(),
                 child: const Text('Send'),
-              )
+              ),
             ],
           ),
         ),
@@ -165,8 +196,11 @@ class _MessageBarState extends State<_MessageBar> {
 }
 
 class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({Key? key, required this.message, this.profile})
-      : super(key: key);
+  const _ChatBubble({
+    Key? key,
+    required this.message,
+    required this.profile,
+  }) : super(key: key);
 
   final Message message;
   final Profile? profile;
