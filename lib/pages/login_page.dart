@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_chat_app/constants.dart';
+import 'package:supabase_chat_app/pages/rooms_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'chat_page.dart';
@@ -31,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
       Navigator.of(context)
-          .pushAndRemoveUntil(ChatPage.route(), (route) => false);
+          .pushAndRemoveUntil(RoomsPage.route(), (route) => false);
     } on AuthException catch (error) {
       context.showErrorSnackBar(message: error.message);
     } catch (_) {

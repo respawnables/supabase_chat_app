@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_chat_app/constants.dart';
+import 'package:supabase_chat_app/cubit/profiles/profiles_cubit.dart';
 import 'package:supabase_chat_app/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,11 +21,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'My Chat App',
-      theme: appTheme,
-      home: const SplashPage(),
+    return BlocProvider<ProfilesCubit>(
+      create: (context) => ProfilesCubit(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'SupaChat',
+        theme: appTheme,
+        home: const SplashPage(),
+      ),
     );
   }
 }

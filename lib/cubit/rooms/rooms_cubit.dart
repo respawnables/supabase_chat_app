@@ -7,6 +7,7 @@ import 'package:supabase_chat_app/constants.dart';
 import '../../models/message.dart';
 import '../../models/profile.dart';
 import '../../models/room.dart';
+import '../profiles/profiles_cubit.dart';
 
 part 'rooms_state.dart';
 
